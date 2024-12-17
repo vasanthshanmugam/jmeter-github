@@ -34,7 +34,7 @@ jobs:
     # Run JMeter Test
     - name: Run JMeter Tests
       run: |
-        ~/jmeter/bin/jmeter -n -t https://github.com/vasanthshanmugam/jmeter-github/Script2.jmx -l results.jtl
+        ~/jmeter/bin/jmeter -n -t Script2.jmx -l results.jtl
 
     # Save JMeter Results as an Artifact
     - name: Upload JMeter Results
