@@ -35,7 +35,12 @@ jobs:
     - name: Run JMeter Tests
       run: |
         ~/jmeter/bin/jmeter -n -t Script2.jmx -l results.jtl
+    
+        ~/jmeter/bin/jmeter -g results.jtl -o html-report
 
+    
+
+          
     # Save JMeter Results as an Artifact
     - name: Upload JMeter Results
       uses: actions/upload-artifact@v3
