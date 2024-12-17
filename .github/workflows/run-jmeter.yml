@@ -35,10 +35,17 @@ jobs:
     - name: Run JMeter Tests
       run: |
         ~/jmeter/bin/jmeter -n -t Script2.jmx -l results.jtl
-    
-        ~/jmeter/bin/jmeter -g results.jtl -o html-report
 
-    
+    - name: Generate JMeter HTML Report
+      run: |
+        ~/jmeter/bin/jmeter -g results.jtl -o html-report        
+
+    # Upload HTML Report as Artifact
+    - name: Upload HTML Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-html-report
+        path: html-report    
 
           
     # Save JMeter Results as an Artifact
