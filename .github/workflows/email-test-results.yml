@@ -1,0 +1,70 @@
+name: Run JMeter Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  jmeter-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Install Java (required for JMeter)
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    # Install JMeter
+    - name: Install JMeter
+      run: |
+        wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+        tar -xzf apache-jmeter-5.6.3.tgz
+        mv apache-jmeter-5.6.3 ~/jmeter
+
+    # Run JMeter Test
+    - name: Run JMeter Tests
+      run: |
+        ~/jmeter/bin/jmeter -n -t Script2.jmx -l results.jtl
+
+    - name: Generate JMeter HTML Report
+      run: |
+        ~/jmeter/bin/jmeter -g results.jtl -o html-report        
+
+    # Upload HTML Report as Artifact
+    - name: Upload HTML Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-html-report
+        path: html-report    
+
+    # Save JMeter Results as an Artifact
+    - name: Upload JMeter Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-results
+        path: results.jtl
+
+    # Send Email with Test Results
+    - name: Send Email with Results
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        subject: "JMeter Test Results"
+        to: vasanthtce@gmail.com
+        body: |
+          Hi,
+          Please find attached the results of the JMeter tests.
+        attachments: |
+          results.jtl
+          html-report/**
