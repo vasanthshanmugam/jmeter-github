@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main
-  pull_request:
+    paths:
+      - 'github/workflows/run-jmeter.yml'
+    paths-ignore:
+      - 'github/workflows/execute_7_tests.yml'
+      - 'github/workflows/email-test-results.yml'   
   workflow_dispatch:
 
 jobs:
