@@ -1,0 +1,59 @@
+name: Run JMeter Tests with Test Data
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'github/workflows/execute_jmeter_with_data.yml'
+
+  workflow_dispatch:
+
+jobs:
+  jmeter-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Install Java (required for JMeter)
+    # Install Java (required for JMeter)
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+
+    # Install JMeter
+    - name: Install JMeter
+      run: |
+        wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+        tar -xzf apache-jmeter-5.6.3.tgz
+        mv apache-jmeter-5.6.3 ~/jmeter
+
+    # Run JMeter Test
+    - name: Run JMeter Tests
+      run: |
+        ~/jmeter/bin/jmeter -n -t Script-with-data.jmx -l results.jtl
+
+    - name: Generate JMeter HTML Report
+      run: |
+        ~/jmeter/bin/jmeter -g results.jtl -o html-report        
+
+    # Upload HTML Report as Artifact
+    - name: Upload HTML Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-html-report
+        path: html-report    
+
+          
+    # Save JMeter Results as an Artifact
+    - name: Upload JMeter Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-results
+        path: results.jtl
