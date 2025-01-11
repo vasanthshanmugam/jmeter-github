@@ -14,34 +14,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout repository
+    # Step 1: Checkout repository
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Install Java (required for JMeter)
-    # Install Java (required for JMeter)
+    # Step 2: Install Java (required for JMeter)
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
         java-version: '11'
         distribution: 'temurin'
 
-
-    # Install JMeter
+    # Step 3: Install JMeter
     - name: Install JMeter
       run: |
         wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
         tar -xzf apache-jmeter-5.6.3.tgz
         mv apache-jmeter-5.6.3 ~/jmeter
 
-    # Run JMeter Test
+    # Step 4: Download Test Data File
+    - name: Download Test Data File
+      run: |
+        mkdir -p test-data
+        curl -L -o test-data/username-password.csv https://raw.githubusercontent.com/vasanthshanmugam/jmeter-github/main/username-password.csv
+        echo "Test data file downloaded to test-data/username-password.csv"
+
+    # Step 5: Run JMeter Test
     - name: Execute JMeter Test
       run: |
         echo "Starting JMeter test: Script-with-data.jmx"
         ~/jmeter/bin/jmeter -n -t Script-with-data.jmx -l results.jtl
         echo "JMeter test completed: results saved to results.jtl"
 
-    # Generate JMeter HTML Report
+    # Step 6: Generate JMeter HTML Report
     - name: Create JMeter HTML Report
       run: |
         if [[ -s results.jtl ]]; then
@@ -54,16 +59,14 @@ jobs:
           exit 1
         fi
 
-
-    # Upload HTML Report as Artifact
+    # Step 7: Upload HTML Report as Artifact
     - name: Upload HTML Report
       uses: actions/upload-artifact@v3
       with:
         name: jmeter-html-report
         path: html-report    
 
-          
-    # Save JMeter Results as an Artifact
+    # Step 8: Save JMeter Results as an Artifact
     - name: Upload JMeter Results
       uses: actions/upload-artifact@v3
       with:
