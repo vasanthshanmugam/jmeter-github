@@ -38,7 +38,7 @@ jobs:
     - name: Execute JMeter Test
       run: |
         echo "Starting JMeter test: Script-with-data.jmx"
-        ~/jmeter/bin/jmeter -n -t Script2.jmx -l results.jtl
+        ~/jmeter/bin/jmeter -n -t Script-with-data.jmx -l results.jtl
         echo "JMeter test completed: results saved to results.jtl"
 
     # Generate JMeter HTML Report
