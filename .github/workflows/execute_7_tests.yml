@@ -32,20 +32,26 @@ jobs:
     # Define JMX files to run
     - name: Define Test Files
       run: |
-        echo "Script1.jmx\nScript2.jmx\nScript3.jmx\nScript4.jmx\nScript5.jmx\nScript6.jmx\nScript7.jmx" > test-files.txt
+        echo -e "Script1.jmx\nScript2.jmx\nScript3.jmx\nScript4.jmx\nScript5.jmx\nScript6.jmx\nScript7.jmx" > test-files.txt
 
     # Run JMeter Tests Sequentially
     - name: Run JMeter Tests
+      shell: bash
       run: |
         while IFS= read -r jmx_file; do
           echo "Starting test: $jmx_file"
           results_file="results_${jmx_file%.jmx}.jtl"
           report_dir="html-report-${jmx_file%.jmx}"
 
-          ~/jmeter/bin/jmeter -n -t "$jmx_file" -l "$results_file"
-          echo "Test completed: $jmx_file"
+          if [[ -f "$jmx_file" ]]; then
+            ~/jmeter/bin/jmeter -n -t "$jmx_file" -l "$results_file"
+            echo "Test completed: $jmx_file"
 
-          ~/jmeter/bin/jmeter -g "$results_file" -o "$report_dir"
+            ~/jmeter/bin/jmeter -g "$results_file" -o "$report_dir"
+          else
+            echo "Error: $jmx_file doesn't exist or can't be opened"
+            exit 1
+          fi
         done < test-files.txt
 
     # Upload HTML Reports and Results as Artifacts
