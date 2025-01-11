@@ -1,0 +1,76 @@
+name: Run JMeter Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  jmeter-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Install Java (required for JMeter)
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    # Install JMeter
+    - name: Install JMeter
+      run: |
+        wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+        tar -xzf apache-jmeter-5.6.3.tgz
+        mv apache-jmeter-5.6.3 ~/jmeter
+
+    # Define JMX files to run
+    - name: Define Test Files
+      run: |
+        echo "Script1.jmx\nScript2.jmx\nScript3.jmx\nScript4.jmx\nScript5.jmx\nScript6.jmx\nScript7.jmx" > test-files.txt
+
+    # Run JMeter Tests Sequentially
+    - name: Run JMeter Tests
+      run: |
+        while IFS= read -r jmx_file; do
+          echo "Starting test: $jmx_file"
+          results_file="results_${jmx_file%.jmx}.jtl"
+          report_dir="html-report-${jmx_file%.jmx}"
+
+          ~/jmeter/bin/jmeter -n -t "$jmx_file" -l "$results_file"
+          echo "Test completed: $jmx_file"
+
+          ~/jmeter/bin/jmeter -g "$results_file" -o "$report_dir"
+        done < test-files.txt
+
+    # Upload HTML Reports and Results as Artifacts
+    - name: Upload JMeter Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-html-reports
+        path: |
+          html-report-Script1
+          html-report-Script2
+          html-report-Script3
+          html-report-Script4
+          html-report-Script5
+          html-report-Script6
+          html-report-Script7
+
+    - name: Upload JMeter Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-results
+        path: |
+          results_Script1.jtl
+          results_Script2.jtl
+          results_Script3.jtl
+          results_Script4.jtl
+          results_Script5.jtl
+          results_Script6.jtl
+          results_Script7.jtl
