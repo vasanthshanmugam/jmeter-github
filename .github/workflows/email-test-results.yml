@@ -6,9 +6,7 @@ on:
       - main
     paths:
       - 'github/workflows/email-test-results.yml'
-    paths-ignore:
-      - 'github/workflows/execute_7_tests.yml'
-      - 'github/workflows/run-jmeter.yml'   
+ 
   workflow_dispatch:
 jobs:
   jmeter-tests:
