@@ -1,4 +1,4 @@
-name: Run JMeter Tests
+name: Run First JMeter Tests
 
 on:
   push:
