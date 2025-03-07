@@ -1,0 +1,69 @@
+name: Run JMeter Tests with Param File
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'github/workflows/run-jmeter.yml'
+
+  workflow_dispatch:
+    inputs:
+      users:
+        description: 'Number of users'
+        required: true
+        default: '50'
+      duration:
+        description: 'Test duration (seconds)'
+        required: true
+        default: '120'
+
+jobs:
+  jmeter-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout repository
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Install Java (required for JMeter)
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    # Install JMeter
+    - name: Install JMeter
+      run: |
+        wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+        tar -xzf apache-jmeter-5.6.3.tgz
+        mv apache-jmeter-5.6.3 ~/jmeter
+
+    # Download CSV File
+    - name: Download CSV File
+      run: wget -O cred.csv https://raw.githubusercontent.com/vasanthshanmugam/jmeter-github/main/test-data/cred.csv
+
+    # Run JMeter Test with dynamic users and duration
+    - name: Run JMeter Tests
+      run: |
+        ~/jmeter/bin/jmeter -n -t github_03_parameter_ci_cd.jmx -l results.jtl -Jusers=${{ github.event.inputs.users }} -Jduration=${{ github.event.inputs.duration }}
+
+    - name: Generate JMeter HTML Report
+      run: |
+        ~/jmeter/bin/jmeter -g results.jtl -o html-report        
+
+    # Upload HTML Report as Artifact
+    - name: Upload HTML Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: jmeter-html-report
+        path: html-report    
+
+    # Save JMeter Results as an Artifact
+    - name: Upload JMeter Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: jmeter-results
+        path: results.jtl
